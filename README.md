@@ -63,28 +63,33 @@ To save the output to **html** as well as **csv**, find the following code and u
 ```# saveHTML=True```
 
 **Output Path**
+
 To save the output to a path other than the current working directory, find the following code and change it to your prefered save path:
 
 ```savePath = os.getcwd()+'/'```
 
 **Table Attributes to Include**
+
 To configure the core table attributes to include in **tables.csv** find the following code and change it to your preferred attributes:
 
 ```tableKeysToCopy = ['TableName','TableStatus','Replicas','TableSizeBytes','ItemCount']```
 ```tableDictsToCopy = ['ProvisionedThroughput','BillingModeSummary']```
  
  **Alarm Attributes to Include**
+ 
 To configure the core table attributes to include in **alarms.csv** find the following code and change it to your preferred attributes:
 
  ```alarmKeysToCopy = ['AlarmName','AlarmStatus','ActionsEnabled','StateValue','MetricName','Namespace','Statistic']```
 
 **Important Missing Alarms to List if Missing**
+
 To configure the missing metrics based alarms to be searched and included in **missedAlarms.csv** find the following code and change it to your preferred metrics:
 
 ```importantAlarms = ['ConsumedReadCapacityUnits','ConsumedWriteCapacityUnits','ReadThrottleEvents','WriteThrottleEvents','ThrottledRequests','SuccessfulRequestLatency','SystemErrors']```
 ```importantGlobalAlarms = ['ReplicationLatency']```
 
  ## Running the Script
+ 
 In your bash command line environment, execute the script with the installed Python interpreter:
 
 ```python DDB_TablesAndAlarm.py```
@@ -100,6 +105,7 @@ You will see the following console output:
 > Process exited with code: 0
 
  ## Script Output
+ 
 When run against an AWS account, this script produces tabular CSV files with core attributes for:
 
  - DynamoDB tables (**tables.csv / tables.html**)
