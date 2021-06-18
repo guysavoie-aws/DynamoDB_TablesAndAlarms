@@ -87,8 +87,11 @@ In your bash command line environment, execute the script with the installed Pyt
 You will see the following console output:
 
 > Listing DynamoDB Tables, GSIs, LSIs per region...
+> 
 > Alarms...
+> 
 > Missing Alarms...
+> 
 > Process exited with code: 0
 
  ## Script Output
