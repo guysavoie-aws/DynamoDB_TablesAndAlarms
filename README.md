@@ -9,6 +9,7 @@ Amazon DynamoDB is a powerful serverless database that offers virtually unlimite
 
 
 **DynamoDB Tables**
+
 Summarizing the complete inventory of DynamoDB tables already provisioned across one or more regions is tedious for a non-trivial number of DynamoDB tables. Core attributes for DynamoDB tables commonly include:
  - capacity mode (provisioned, on demand) 
  - tags
@@ -17,6 +18,7 @@ Summarizing the complete inventory of DynamoDB tables already provisioned across
  - global secondary indexes and local secondary indexes
 
 **Monitoring with CloudWatch Alarms**
+
 In [AWS Well Architected](https://aws.amazon.com/architecture/well-architected) effective monitoring of resources is a concern within the [Operational Excellence](https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar) and https://docs.aws.amazon.com/wellarchitected/latest/performance-efficiency-pillar pillars.
 
 Following best practices for [monitoring Amazon DynamoDB for operational awareness](https://aws.amazon.com/blogs/database/monitoring-amazon-dynamodb-for-operational-awareness/) improves visibility into the correct functioning of your DynamoDB tables.
@@ -36,6 +38,7 @@ Following best practices for [monitoring Amazon DynamoDB for operational awarene
 ## Setup Steps
 
 **Initial Setup**
+
 1. Clone this repository to a folder in your working environment, or download to a working folder via the green button above.
 
 2. Verify the AWS CLI is setup and running by running ```aws dynamodb describe-limits```. You should see no errors.
@@ -43,11 +46,13 @@ Following best practices for [monitoring Amazon DynamoDB for operational awarene
 3. Open **DDB_TablesAndAlarm.py** with your code editor of choice to complete any desired configuration.
 
 **Region Configuration**
+
 When executed, the script will list all tables in all regions. To limit the script to tables within a subset of regions, find the following code, uncomment it, and enter a list of comma separated regions to query for DynamoDB tables:
 
 	```# limitToRegionList = {'us-east-1'}```
 
 **Tag Configuration**	
+
 To limit the script to tables with a given tag, find the following code, uncomment it, and set the desired key and value properties to limit the query for DynamoDB tables:
 
 ```# limitToTablesWithTag = {'Key':'Owner','Value':'blueTeam'}```
