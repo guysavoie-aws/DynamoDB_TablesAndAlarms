@@ -53,7 +53,7 @@ Following best practices for [monitoring Amazon DynamoDB for operational awarene
 
 When executed, the script will list all tables in all regions. To limit the script to tables within a subset of regions, find the following code, uncomment it, and enter a list of comma separated regions to query for DynamoDB tables:
 
-	```# limitToRegionList = {'us-east-1'}```
+```# limitToRegionList = {'us-east-1'}```
 
 **Tag Configuration**	
 
