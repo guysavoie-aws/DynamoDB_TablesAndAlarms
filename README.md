@@ -44,36 +44,44 @@ Following best practices for [monitoring Amazon DynamoDB for operational awarene
 
 **Region Configuration**
 When executed, the script will list all tables in all regions. To limit the script to tables within a subset of regions, find the following code, uncomment it, and enter a list of comma separated regions to query for DynamoDB tables:
+
 	```# limitToRegionList = {'us-east-1'}```
 
 **Tag Configuration**	
 To limit the script to tables with a given tag, find the following code, uncomment it, and set the desired key and value properties to limit the query for DynamoDB tables:
+
 ```# limitToTablesWithTag = {'Key':'Owner','Value':'blueTeam'}```
 
 **HTML Output**
 To save the output to **html** as well as **csv**, find the following code and uncomment it:
+
 ```# saveHTML=True```
 
 **Output Path**
 To save the output to a path other than the current working directory, find the following code and change it to your prefered save path:
+
 ```savePath = os.getcwd()+'/'```
 
 **Table Attributes to Include**
 To configure the core table attributes to include in **tables.csv** find the following code and change it to your preferred attributes:
+
 ```tableKeysToCopy = ['TableName','TableStatus','Replicas','TableSizeBytes','ItemCount']```
 ```tableDictsToCopy = ['ProvisionedThroughput','BillingModeSummary']```
  
  **Alarm Attributes to Include**
 To configure the core table attributes to include in **alarms.csv** find the following code and change it to your preferred attributes:
+
  ```alarmKeysToCopy = ['AlarmName','AlarmStatus','ActionsEnabled','StateValue','MetricName','Namespace','Statistic']```
 
 **Important Missing Alarms to List if Missing**
 To configure the missing metrics based alarms to be searched and included in **missedAlarms.csv** find the following code and change it to your preferred metrics:
+
 ```importantAlarms = ['ConsumedReadCapacityUnits','ConsumedWriteCapacityUnits','ReadThrottleEvents','WriteThrottleEvents','ThrottledRequests','SuccessfulRequestLatency','SystemErrors']```
 ```importantGlobalAlarms = ['ReplicationLatency']```
 
  ## Running the Script
 In your bash command line environment, execute the script with the installed Python interpreter:
+
 ```python DDB_TablesAndAlarm.py```
 
 You will see the following console output:
