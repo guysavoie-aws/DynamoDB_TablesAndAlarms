@@ -1,7 +1,11 @@
 
 # List DynamoDB Tables and CloudWatch Alarms
  
-A Python script to generate a list of DynamoDB tables, related CloudWatch alarms, and given a list of important metrics, a list of tables with no alarms set for specific important metrics.
+A Python script to generate:
+
+- a list of DynamoDB tables in one to all regions
+- a list of related CloudWatch alarms for the DynamoDB tables
+- a list of tables that do not have alarms set for a list of important metrics
  
 ## Introduction
  
