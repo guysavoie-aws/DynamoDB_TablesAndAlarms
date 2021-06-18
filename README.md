@@ -115,7 +115,7 @@ When run against an AWS account, this script produces tabular CSV files with cor
  - DynamoDB tables (**tables.csv / tables.html**)
  - DynamoDB Global Secondary Indexes (**gsis.csv / gsis.html**)
  - DynamoDB Local Secondary Indexes (**lsis.csv / lsis.html**)
- - CloudWatch alarms for DynamoDB tables (**tables.csv / tables.html**)
+ - CloudWatch alarms for DynamoDB tables (**alarms.csv / alarms.html**)
  - Missing CloudWatch alarms (from a list of important metrics to query) (**missedAlarms.csv / missedAlarms.html**)
 
 ## Next Steps
