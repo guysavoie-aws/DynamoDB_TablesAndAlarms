@@ -85,7 +85,7 @@ To configure the core table attributes to include in **alarms.csv** find the fol
 
  ```alarmKeysToCopy = ['AlarmName','AlarmStatus','ActionsEnabled','StateValue','MetricName','Namespace','Statistic']```
 
-**Important Missing Alarms to List if Missing**
+**Important Alarms to List if Missing**
 
 To configure the missing metrics based alarms to be searched and included in **missedAlarms.csv** find the following code and change it to your preferred metrics:
 
