@@ -96,18 +96,27 @@ To configure the missing metrics based alarms to be searched and included in **m
  
 In your bash command line environment, execute the script with the installed Python interpreter:
 
-```python AuditDynamoDBTablesAndAlarms.py```
+```console
+python AuditDynamoDBTablesAndAlarms.py
+```
 
 You will see console output similar to:
 
->Discovering DynamoDB resources in us-east-1:Tables...GSIs...LSIs...CloudWatch >Metric Alarms...done.
->Discovering DynamoDB resources in us-east-2:Tables...GSIs...LSIs...CloudWatch >Metric Alarms...done.
->Discovering DynamoDB resources in us-west-1:Tables...GSIs...LSIs...CloudWatch >Metric Alarms...done.
->Discovering DynamoDB resources in us-west-2:Tables...GSIs...LSIs...CloudWatch >Metric Alarms...done.
->
->Auditing Missing CloudWatch Metric Alarms
->Table Alarms...Account Level Alarms...done.
->Saving Results...done.
+```console
+Discovering DynamoDB resources in us-east-1:Tables...GSIs...LSIs...CloudWatch 
+Metric Alarms...done.
+Discovering DynamoDB resources in us-east-2:Tables...GSIs...LSIs...CloudWatch
+Metric Alarms...done.
+Discovering DynamoDB resources in us-west-1:Tables...GSIs...LSIs...CloudWatch
+Metric Alarms...done.
+Discovering DynamoDB resources in us-west-2:Tables...GSIs...LSIs...CloudWatch
+Metric Alarms...done.
+
+Auditing Missing CloudWatch Metric Alarms
+Table Alarms...Account Level Alarms...done.
+
+Saving Results...done.
+```
 
  ## Script Output
  
