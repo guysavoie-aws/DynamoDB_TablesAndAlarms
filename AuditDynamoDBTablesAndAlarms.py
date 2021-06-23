@@ -7,6 +7,7 @@ import os
 
 YES_STRING = '[YES]'
 NO_STRING = '-'
+ACCT_LEVEL_STRING = '[ACCOUNT_LEVEL]'
 
 #------------------------------------------------------
 # limitToRegionList = {'us-east-1'}
@@ -17,11 +18,11 @@ savePath = os.getcwd()+'/'
 
 tableKeysToCopy = ['TableName','TableStatus','Replicas','TableSizeBytes','ItemCount']
 tableDictsToCopy = ['ProvisionedThroughput','BillingModeSummary']
-alarmKeysToCopy = ['AlarmName','AlarmStatus','ActionsEnabled','StateValue','MetricName','Namespace','Statistic']
+alarmKeysToCopy = ['AlarmName','AlarmStatus','ActionsEnabled','StateValue','MetricName','Statistic']
 
 importantAlarms = ['ConsumedReadCapacityUnits','ConsumedWriteCapacityUnits','ReadThrottleEvents','WriteThrottleEvents','ThrottledRequests','SuccessfulRequestLatency','SystemErrors']
 importantGlobalAlarms = ['ReplicationLatency']
-
+importantAccountAlarms = ['AccountProvisionedReadCapacityUtilization','AccountProvisionedWriteCapacityUtilization','MaxProvisionedTableReadCapacityUtilization','MaxProvisionedTableWriteCapacityUtilization','AccountTableLimitPct']
 
 #------------------------------------------------------
 def datetime_handler(x):
@@ -49,18 +50,20 @@ if not ('limitToRegionList' in globals()) or (len(limitToRegionList) == 0):
 #------------------------------------------------------
 ''' List all DynamoDB Tables in Account '''
 #------------------------------------------------------
-print("Listing DynamoDB Tables, GSIs, LSIs per region...\r\n")
-
 myTables = []
-gsi = []
-lsi = []
+myGSIs = []
+myLSIs = []
+myMetricAlarms = []
+myMissingMetricAlarms=[]
 
 for regionName in limitToRegionList:
+    print('Discovering DynamoDB resources in '+regionName+':',end='')
     dynamodb = boto3.client("dynamodb",region_name=regionName)
+    
+    print('Tables...GSIs...LSIs...', end='' )
     
     tablePaginator = dynamodb.get_paginator('list_tables')
     tableIterator = tablePaginator.paginate()
-#    response = dynamodb.list_tables()
     for tablePage in tableIterator:
         for myTableName in tablePage['TableNames']: 
             #------------------------------------------------------
@@ -81,8 +84,6 @@ for regionName in limitToRegionList:
                     
             tagsForTable=dynamodb.list_tags_of_resource(ResourceArn=tableDescription['TableArn'])
             if len(tagsForTable['Tags']) > 0:
-#                print(myTableName)
-#                print(tagsForTable['Tags'])
                 reducedTags = {sub['Key'] : sub['Value'] for sub in tagsForTable['Tags']}
             else:
                 reducedTags=NO_STRING
@@ -112,8 +113,7 @@ for regionName in limitToRegionList:
                 for singleGSI in globalSecondaryIndexes:
                     singleGSI['TableName'] = myTableName
                     singleGSI['RegionName'] = regionName  
-#                    print(singleGSI)
-                    gsi.append(singleGSI.copy())
+                    myGSIs.append(singleGSI.copy())
 
             #------------------------------------------------------
             ''' LSIs '''
@@ -123,81 +123,53 @@ for regionName in limitToRegionList:
                 for singleLSI in localSecondaryIndexes:
                     singleLSI['TableName'] = myTableName
                     singleLSI['RegionName'] = regionName  
-#                    print(singleLSI)
-                    lsi.append(singleLSI.copy())
-            
-tables = pd.DataFrame(myTables)
-tables.drop(columns=['NumberOfDecreasesToday','LastDecreaseDateTime','LastUpdateToPayPerRequestDateTime'],inplace=True,errors='ignore' )
-tables.sort_values(by = ['RegionName', 'TableName'],inplace=True)
+                    myLSIs.append(singleLSI.copy())
+    
+    print('CloudWatch Metric Alarms...',end='')
 
-saveDataframe('tables',tables,'DynamoDB Tables')
-
-
-gsitoCSV = pd.DataFrame(gsi)
-saveDataframe('gsis',gsitoCSV,"Global Secondary Indexes")
-
-lsitoCSV = pd.DataFrame(lsi)
-saveDataframe('lsis',lsitoCSV,"Local Secondary Indexes")
-
-#------------------------------------------------------
-''' Metrics and Alarms '''
-#------------------------------------------------------
-cloudWatch = boto3.client("cloudwatch")
-
-#------------------------------------------------------
-''' Alarms '''
-#------------------------------------------------------
-
-print("")
-print("Alarms...")
-
-
-myMetricAlarms = []
-
-alarmPaginator = cloudWatch.get_paginator('describe_alarms')
-alarmIterator = alarmPaginator.paginate()
-for alarmPage in alarmIterator:
-    for myMetricAlarm in alarmPage['MetricAlarms']:
-        alarmSummary = {}
-    #    alarmDictsToAdd = {'Dimensions'}
-        if 'Namespace' in myMetricAlarm and myMetricAlarm['Namespace'] == 'AWS/DynamoDB':
-            alarmSummary['TableName']=myMetricAlarm['Dimensions'][0]['Value']
-            for keyToCopy in alarmKeysToCopy:
-                if keyToCopy in myMetricAlarm:
-                    alarmSummary[keyToCopy]=myMetricAlarm[keyToCopy]
-            for dictToAdd in tableDictsToCopy:
-                if dictToAdd in myMetricAlarm:
-                    alarmSummary.update(myMetricAlarm[dictToAdd])
-            myMetricAlarms.append(alarmSummary.copy())
-
-alarms = pd.DataFrame(myMetricAlarms)
-saveDataframe('alarms',alarms,"Existing DynamoDB Cloudwatch Alarms")
-
-#------------------------------------------------------
-''' Composite Alarms '''
-#------------------------------------------------------
-
-# TO DO
-# myCompositeAlarms = alarms['CompositeAlarms']
-# print(myCompositeAlarms)
-
-
+    #------------------------------------------------------
+    ''' Metrics and Alarms '''
+    #------------------------------------------------------
+    cloudWatch = boto3.client("cloudwatch",region_name=regionName)
+    
+    #------------------------------------------------------
+    ''' Alarms '''
+    #------------------------------------------------------
+    
+    alarmPaginator = cloudWatch.get_paginator('describe_alarms')
+    alarmIterator = alarmPaginator.paginate()
+    for alarmPage in alarmIterator:
+        for myMetricAlarm in alarmPage['MetricAlarms']:
+            alarmSummary = {}
+            alarmSummary['RegionName']=regionName
+            if 'Namespace' in myMetricAlarm and myMetricAlarm['Namespace'] == 'AWS/DynamoDB':
+                if ('Dimensions' in myMetricAlarm) and (len(myMetricAlarm['Dimensions']) == 0):
+                    alarmSummary['TableName']= ACCT_LEVEL_STRING
+                else:
+                    alarmSummary['TableName']=myMetricAlarm['Dimensions'][0]['Value']
+                for keyToCopy in alarmKeysToCopy:
+                    if keyToCopy in myMetricAlarm:
+                        alarmSummary[keyToCopy]=myMetricAlarm[keyToCopy]
+                for dictToAdd in tableDictsToCopy:
+                    if dictToAdd in myMetricAlarm:
+                        alarmSummary.update(myMetricAlarm[dictToAdd])
+                myMetricAlarms.append(alarmSummary.copy())
+    print('done.')
 #------------------------------------------------------
 ''' Missing Alarms '''
 #------------------------------------------------------
 
-
 print("")
-print("Missing Alarms...")
+print("Auditing Missing CloudWatch Metric Alarms")
 
-missingMetricAlarms=[]
-
+print('Table Alarms...',end='')
+# Audit Table level alarms  
 for table in myTables:
     missedAlarmsOnTable = []
     missedDict = {}
 
-    missedDict['Region Name'] = table['RegionName']
-    missedDict['Table Name'] = table['TableName']
+    missedDict['RegionName'] = table['RegionName']
+    missedDict['TableName'] = table['TableName']
     
     if 'Replicas' in table and table['Replicas']==YES_STRING:
         missedDict['Global'] = YES_STRING
@@ -207,20 +179,64 @@ for table in myTables:
     else:
         missedDict['Global'] = NO_STRING
     for alarmToCheck in importantAlarms:
-        if not any(d['TableName'] == table['TableName'] and d['MetricName'] == alarmToCheck for d in myMetricAlarms):
+        if not any(d['RegionName'] == table['RegionName'] and d['TableName'] == table['TableName'] and d['MetricName'] == alarmToCheck for d in myMetricAlarms):
             missedAlarmsOnTable.append(alarmToCheck)
             
     if len(missedAlarmsOnTable) == 0:
         strListOfMissingAlarms=NO_STRING
     else:
         strListOfMissingAlarms = ",".join(missedAlarmsOnTable)
+    missedDict['No Alarms For CloudWatch Metric'] = strListOfMissingAlarms
+    myMissingMetricAlarms.append(missedDict.copy())
+print('Account Level Alarms...',end='')
+
+# Audit Account level alarms  
+for regionName in limitToRegionList:
+    missedAlarmsOnTable = []
+    missedDict = {}
+    missedDict['RegionName'] = regionName
+    missedDict['TableName'] = ACCT_LEVEL_STRING
+    missedDict['Global'] = NO_STRING
+    for alarmToCheck in importantAccountAlarms:
+        if not any(d['RegionName']== regionName and d['TableName'] == ACCT_LEVEL_STRING and d['MetricName'] == alarmToCheck for d in myMetricAlarms):
+            missedAlarmsOnTable.append(alarmToCheck)
+    if len(missedAlarmsOnTable) == 0:
+        strListOfMissingAlarms=NO_STRING
+    else:
+        strListOfMissingAlarms = ",".join(missedAlarmsOnTable)
     missedDict['No CloudWatch Alarms For'] = strListOfMissingAlarms
-    missingMetricAlarms.append(missedDict.copy())
+    myMissingMetricAlarms.append(missedDict.copy())
+print('done.')
 
-missedAlarms = pd.DataFrame(missingMetricAlarms)
-missedAlarms.to_csv('~/environment/missedAlarms.csv',index=False)
-saveDataframe('missedAlarms',missedAlarms,"DynamoDB Tables - Important Metric Alarms not found")
 
+#------------------------------------------------------
+''' Save Results '''
+#------------------------------------------------------
+
+print('Saving Results...',end='')
+
+dfTables = pd.DataFrame(myTables)
+dfTables.drop(columns=['NumberOfDecreasesToday','LastDecreaseDateTime','LastUpdateToPayPerRequestDateTime'],inplace=True,errors='ignore' )
+dfTables.sort_values(by = ['RegionName', 'TableName'],inplace=True)
+saveDataframe('tables',dfTables,'DynamoDB Tables')
+
+dfGSIs = pd.DataFrame(myGSIs)
+dfGSIs.sort_values(by = ['RegionName', 'TableName'],inplace=True)
+saveDataframe('GSIs',dfGSIs,"Global Secondary Indexes")
+
+dfLSIs = pd.DataFrame(myLSIs)
+dfLSIs.sort_values(by = ['RegionName', 'TableName'],inplace=True)
+saveDataframe('LSIs',dfLSIs,"Local Secondary Indexes")
+
+dfAlarms = pd.DataFrame(myMetricAlarms)
+dfAlarms.sort_values(by = ['RegionName', 'TableName','AlarmName'],inplace=True)
+saveDataframe('alarms',dfAlarms,"Existing DynamoDB Cloudwatch Alarms")
+
+dfMissedAlarms = pd.DataFrame(myMissingMetricAlarms)
+# missedAlarms.sort_values(by = ['TableName','RegionName'],inplace=True)
+saveDataframe('missedAlarms',dfMissedAlarms,"DynamoDB Tables - Important Metric Alarms not found")
+
+print('done.')
 
 #------------------------------------------------------
 
