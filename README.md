@@ -1,29 +1,26 @@
 
-# List DynamoDB Tables and CloudWatch Alarms
+# Audit DynamoDB Tables and CloudWatch Alarms
  
-A Python script to generate:
+A Python script to:
 
-- a list of DynamoDB tables in one to all regions
-- a list of related CloudWatch alarms for the DynamoDB tables
-- a list of tables that do not have alarms set for a list of important metrics
- 
+- list DynamoDB tables in one to all regions
+- list related CloudWatch alarms for the DynamoDB tables
+- audit and list missing CloudWatch alarms (table and regional account metrics)  based on the recommendations in [monitoring Amazon DynamoDB for operational awareness](https://aws.amazon.com/blogs/database/monitoring-amazon-dynamodb-for-operational-awareness/) 
+
 ## Introduction
  
 Amazon DynamoDB is a powerful serverless database that offers virtually unlimited scale when used efficiently. DynamoDB tables are easily provisioned through CLI, API, AWS Console, AWS CloudFormation, AWS Amplify and other services.
 
-
-**DynamoDB Tables**
-
-Summarizing the complete inventory of DynamoDB tables already provisioned across one or more regions is tedious for a non-trivial number of DynamoDB tables. Core attributes for DynamoDB tables commonly include:
+Auditing the inventory of DynamoDB tables provisioned across regions is tedious for a non-trivial number of tables. Core attributes in a DynamoDB table inventory commonly include:
  - capacity mode (provisioned, on demand) 
  - tags
  - current table size and item count 
  - global table 
  - global secondary indexes and local secondary indexes
 
-**Monitoring with CloudWatch Alarms**
+**Monitoring**
 
-In [AWS Well Architected](https://aws.amazon.com/architecture/well-architected) effective monitoring of resources is a concern within the [Operational Excellence](https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar) and https://docs.aws.amazon.com/wellarchitected/latest/performance-efficiency-pillar pillars.
+Effective monitoring of resources is a concern within the [Operational Excellence](https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar) and https://docs.aws.amazon.com/wellarchitected/latest/performance-efficiency-pillar pillars of the [AWS Well Architected Framework](https://aws.amazon.com/architecture/well-architected)
 
 Following best practices for [monitoring Amazon DynamoDB for operational awareness](https://aws.amazon.com/blogs/database/monitoring-amazon-dynamodb-for-operational-awareness/) improves visibility into the correct functioning of your DynamoDB tables.
 
@@ -47,7 +44,7 @@ Following best practices for [monitoring Amazon DynamoDB for operational awarene
 
 2. Verify the AWS CLI is setup and running by running ```aws dynamodb describe-limits```. You should see no errors.
 
-3. Open **DDB_TablesAndAlarm.py** with your code editor of choice to complete any desired configuration.
+3. Open **AuditDynamoDBTablesAndAlarms.py** with your code editor of choice to complete any desired configuration.
 
 **Region Configuration**
 
@@ -62,6 +59,7 @@ To limit the script to tables with a given tag, find the following code, uncomme
 ```# limitToTablesWithTag = {'Key':'Owner','Value':'blueTeam'}```
 
 **HTML Output**
+
 To save the output to **html** as well as **csv**, find the following code and uncomment it:
 
 ```# saveHTML=True```
@@ -91,34 +89,40 @@ To configure the missing metrics based alarms to be searched and included in **m
 
 ```importantAlarms = ['ConsumedReadCapacityUnits','ConsumedWriteCapacityUnits','ReadThrottleEvents','WriteThrottleEvents','ThrottledRequests','SuccessfulRequestLatency','SystemErrors']```
 ```importantGlobalAlarms = ['ReplicationLatency']```
+```importantAccountAlarms = ['AccountProvisionedReadCapacityUtilization','AccountProvisionedWriteCapacityUtilization','MaxProvisionedTableReadCapacityUtilization','MaxProvisionedTableWriteCapacityUtilization','AccountTableLimitPct']```
+
 
  ## Running the Script
  
 In your bash command line environment, execute the script with the installed Python interpreter:
 
-```python DDB_TablesAndAlarm.py```
+```python AuditDynamoDBTablesAndAlarms.py```
 
-You will see the following console output:
+You will see console output similar to:
 
-> Listing DynamoDB Tables, GSIs, LSIs per region...
-> 
-> Alarms...
-> 
-> Missing Alarms...
-> 
-> Process exited with code: 0
+>Discovering DynamoDB resources in us-east-1:Tables...GSIs...LSIs...CloudWatch >Metric Alarms...done.
+>Discovering DynamoDB resources in us-east-2:Tables...GSIs...LSIs...CloudWatch >Metric Alarms...done.
+>Discovering DynamoDB resources in us-west-1:Tables...GSIs...LSIs...CloudWatch >Metric Alarms...done.
+>Discovering DynamoDB resources in us-west-2:Tables...GSIs...LSIs...CloudWatch >Metric Alarms...done.
+>
+>Auditing Missing CloudWatch Metric Alarms
+>Table Alarms...Account Level Alarms...done.
+>Saving Results...done.
 
  ## Script Output
  
 When run against an AWS account, this script produces tabular CSV files with core attributes for:
 
- - DynamoDB tables (**tables.csv / tables.html**)
- - DynamoDB Global Secondary Indexes (**gsis.csv / gsis.html**)
- - DynamoDB Local Secondary Indexes (**lsis.csv / lsis.html**)
- - CloudWatch alarms for DynamoDB tables (**alarms.csv / alarms.html**)
- - Missing CloudWatch alarms (from a list of important metrics to query) (**missedAlarms.csv / missedAlarms.html**)
+- DynamoDB tables (**tables.csv / tables.html**)
+- DynamoDB Global Secondary Indexes (**GSIs.csv / GSIs.html**)
+- DynamoDB Local Secondary Indexes (**LSIs.csv / LSIs.html**)
+- CloudWatch alarms for DynamoDB tables (**alarms.csv / alarms.html**)
+- Missing CloudWatch alarms (from a list of important metrics to query) (**missedAlarms.csv / missedAlarms.html**)
 
 ## Next Steps
+
+Planned updates to this script include:
+- Adding functionality to audit recommended GSI metrics and alarms 
 
 Please contribute to this code sample by issuing a Pull Request or creating an Issue.
 
