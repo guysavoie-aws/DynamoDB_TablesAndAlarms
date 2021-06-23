@@ -20,7 +20,7 @@ Auditing the inventory of DynamoDB tables provisioned across regions is tedious 
 
 **Monitoring**
 
-Effective monitoring of resources is a concern within the [Operational Excellence](https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar) and https://docs.aws.amazon.com/wellarchitected/latest/performance-efficiency-pillar pillars of the [AWS Well Architected Framework](https://aws.amazon.com/architecture/well-architected)
+Effective monitoring of resources is a concern within the [Operational Excellence](https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar) and https://docs.aws.amazon.com/wellarchitected/latest/performance-efficiency-pillar pillars of the [AWS Well Architected Framework](https://aws.amazon.com/architecture/well-architected).
 
 Following best practices for [monitoring Amazon DynamoDB for operational awareness](https://aws.amazon.com/blogs/database/monitoring-amazon-dynamodb-for-operational-awareness/) improves visibility into the correct functioning of your DynamoDB tables.
 
