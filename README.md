@@ -135,4 +135,4 @@ Planned updates to this script include:
 
 Please contribute to this code sample by issuing a Pull Request or creating an Issue.
 
-Share your feedback to: guypsavoie@gmail.com
+Share your feedback to: gssavoi@amazon.com
