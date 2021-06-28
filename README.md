@@ -30,8 +30,8 @@ Following best practices for [monitoring Amazon DynamoDB for operational awarene
 * A bash command-line environment such as:
 	* Mac Terminal
 	* Windows bash shell
-	* AWS Cloud9
-	* AWS CloudShell
+	* [AWS Cloud9](https://aws.amazon.com/cloud9/)
+	* [AWS CloudShell](https://aws.amazon.com/cloudshell/)
 * Access to the [AWS CLI](https://aws.amazon.com/cli/) setup and configured
 * [Python](https://www.python.org/) set up and configured
 * [Pandas](https://pandas.pydata.org/) set up and configured
